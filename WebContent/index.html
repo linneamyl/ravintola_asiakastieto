@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" type="text/css" href="css/main.css">
+<title>Ravintolan henkilötietojärjestelmän etusivu</title>
+</head>
+<body>
+<h1>Linnean Ravintolan henkilötietojärjestelmä </h1>
+<h3>Lisää Henkilö</h3>
+<p>Tällä ohjelmalla voit lisätä tietoa ravintolassa käyneistä ihmisitä(jos he antavat luvat) mahdollista myöhempää markkinointia varten</p>
+<p> Muokkaustoiminto ja henkilön hakutoiminto eivät ole tällä hetkellä toiminnassa.</p>
+<p>Käyttäjä voi yhä lähettää tyhjän tekstikentän tietokantaan ja se tallentuu. Yritin validoida sen pois, mutten onnistunut.</p>
+<form action="" id="henkiloform" method="post">
+<!-- Alapuolella oleva div tekee taulukosta responsiivisen -->
+<div style="overflow-x:auto;">
+<table class="table">
+	<thead>
+	<!-- Lisää-taulukon otsikot -->
+		<tr>
+			<th>Nimi</th>
+			<th>Osoite</th>
+			<th>Puhnro</th>
+		</tr>
+	</thead>
+	<tbody>
+	<!-- Lisää-taulukon syöttökentät -->
+		<tr>
+			<td><input type="text" name="nimi" id="nimi" ></td>
+			<td><input type="text" name="osoite" id="osoite"></td>
+			<td><input type="text" name="puhnro" id="puhnro" ></td>
+			<td><button id="tallennahenkilo">Lisää</button></td>
+		</tr>
+	</tbody>
+</table>
+</div>
+</form>
+<!-- Tietokannassa tallennettuna olevat henkilöt -->
+<h3>Henkilöt</h3>
+<span id="ilmo"></span>
+<div style="overflow-x:auto;">
+<table id="hlolistaus" class="table">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>Nimi</th>
+			<th>Osoite</th>
+			<th>Puhelinnumero</th>			
+			<th>&nbsp;</th>  <!-- poisto-sarake -->
+		</tr>
+	</thead>
+	<tbody>
+	</tbody>
+</table>
+</div>
+
+<script>
+//JQUERY JA AJAX KOODIA
+$(document).ready(function(){	
+	
+	haeHenkilot(); //SUORITTAA HAEHENKILOT-METODIN, JOSSA TIETOKANNASSA VALMIINA OLEVA TAULUKKO NÄYTETÄÄN
+	
+	
+	$("#tallennahenkilo").click(function (){ //TALLENNAHENKILÖ-METODI, JOSSA NAPPIA PAINAMALLA KÄYTTÄJÄ VOI TALLENTAA UUDEN HENKILÖN TIETOKANTAAN
+
+		var formDataJSObject = $("#henkiloform").serializeArray().reduce( (f,c) => { f[c.name]=c.value; return f;}, {} );
+		var formDataJSON = JSON.stringify(formDataJSObject);
+			console.log(formDataJSON);
+		$.ajax({
+			url:'henkilot', 
+			type: 'POST',
+			contentType: 'application/json',
+			data:formDataJSON,
+			success: function(data, textStatus, jQxhr){
+				console.log(jQxhr);
+				console.log(textStatus);
+				$("#ilmo").html("Henkilön lisääminen onnistui.");
+		    },
+		    error: function(jqXhr, textStatus, errorThrown){
+		    	console.log(jqXhr);
+				console.log(textStatus);
+		    	console.log(errorThrown);
+		        $("#ilmo").html("Virhetilanne henkilön lisäämisessä.");
+		    }
+		});
+		
+		haeHenkilot(); //PÄIVITTÄÄ HENKILÖLISTAN UUDEN HENKILPÖN TALLENTAMISEN JÄLKEEN
+		
+	});  
+	
+
+	$(document).on('click','.poistahenkilo', function(){ //POISTA-NAPPIA PAINAMALLA AJETAAN POISTAHENKILÖ-METODI
+		var obj = $(this); 	
+		var henkiloId = obj[0].id;	
+			console.log(henkiloId);
+		var urlValue = "henkilot?henkiloid="+henkiloId;
+			console.log(urlValue);
+		if(confirm("Varmistus: Haluatko poistaa henkilön id-arvolla: " + henkiloId + "?")){ //VARMISTUS
+		
+			$.ajax({
+				url:urlValue, 
+				type: 'DELETE',
+				success: function(data, textStatus, jQxhr){
+					console.log(jQxhr);
+					console.log(textStatus);
+			        $('#ilmo').html("Henkilön poisto onnistui!");
+			    },
+			    error: function(jqXhr, textStatus, errorThrown){
+			    	console.log(jqXhr);
+			    	console.log(textStatus);
+			        console.log(errorThrown);
+			        $('#ilmo').html("Virhetilanne henkilön poistossa.");
+			    }
+			});
+			haeHenkilot(); //HENKILÖLISTA PÄIVITETÄÄN
+		}
+	});  
+	
+});   
+
+function haeHenkilot(){	//HENKILÖLISTAN NÄYTTÖ. JO TIETOKANNASSA OLEVAT TIEDOT NÄYTETÄÄN
+	$("#hlolistaus tbody").empty();
+	$.ajax({
+		url:'henkilot', 
+		type: 'GET',
+		dataType: 'json',
+		success:function(result){	
+        $.each(result.henkilot, function(i, field){  
+        	var htmlStr;
+        	htmlStr+="<tr id='rivi_"+field.id+"'>"; 
+        	htmlStr+="<td>"+field.id+"</td>";
+        	htmlStr+="<td>"+field.nimi+"</td>";
+        	htmlStr+="<td>"+field.osoite+"</td>";
+        	htmlStr+="<td>"+field.puhnro+"</td>";     	        	
+        	htmlStr+="<td><button class='poistahenkilo' id='"+field.id+"'>Poista</button></td>";
+        
+        	//	ALEMPI EI TOIMI, HÄVITTÄÄ SIVUSTOLTA HENKILÖLISTAN
+        //	htmlStr+="<td><button class='muutahenkilo' id='"+field.id+"'>Muuta</button></td>";
+        	
+        	htmlStr+="</tr>";
+        	$("#hlolistaus tbody").append(htmlStr);
+        	
+        });
+      	
+    }});
+	
+	// 	 MUUTAHENKILÖ METODIN YRITYSTÄ. TÄMÄ EI TOIMI, HÄVITTÄÄ HENKILÖLISTAN SIVUSTOLTA KOKONAAN
+	
+	
+  /*  $("#muutahenkilo").click(function (){
+        $.ajax({
+            url: 'henkilot'
+            method: 'PUT',
+            dataType: 'application/json',
+            data:formDataJSON,
+            success: function (data) {
+                $('#nimi').val(data.title);
+                $('#osoite').val(data.author);
+                $('#puhnro').val(data.id);
+                haehenkilot();
+                $("#ilmo").html("Henkilön lisääminen onnistui.");
+            },
+            error: function (jqXhr, textStatus, errorThrown) {
+            	console.log(jqXhr);
+				console.log(textStatus);
+		    	console.log(errorThrown);
+		        $("#ilmo").html("Virhetilanne henkilön tietojen muokkaamisessa");
+            }
+        }) */
+  //	}
+}  // end of haeHenkilot()
+</script>
+</body>
+</html>

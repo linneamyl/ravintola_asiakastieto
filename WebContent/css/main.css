@@ -1,0 +1,58 @@
+body {
+	/* Taustaväri */
+	background-color: #e6f2ff;
+}
+
+h1 {
+	/* inspiraatio sivustolta https://tympanus.net/codrops/2012/11/02/heading-set-styling-with-css/ 
+	Otsikon muotoilua */
+	margin: 1em 0 0.5em 0;
+	font-weight: 100;
+	text-transform: uppercase;
+	color: #00caa6;
+	font-style: italic;
+	font-family: 'Josefin Sans', sans-serif;
+	font-size: 40px;
+	line-height: 54px;
+	text-shadow: 2px 5px 0 rgba(0,0,0,0.2);
+}
+
+h3 {
+	/* Lisää Henkilö ja henkilöt osioiden otsikkojen muotoilu */
+	margin: 1em 0 0.5em 0;
+	color: #148773;
+	font-size: 26px;
+	line-height: 40px;
+	font-weight: bold;
+	font-family: 'Josefin Sans', sans-serif;
+}
+
+table {
+	/* Taulukon reunat yhtenäisiksi rajoiksi */
+	border-collapse: collapse;
+	width: 100%;
+} 
+th, td {
+	/* taulukolle alareunat */
+	border-bottom: 1px solid #ddd;
+	margin: 1em 0 0.5em 0;
+	color: #343434;
+	font-size: 12px;
+	line-height: 20px;
+	font-weight: bold;
+	font-family: 'Josefin Sans', sans-serif;
+	text-align: center;
+}
+th {
+	/* Taulukon otsikoiden muotoilu */
+	text-align: center;
+	height: 50px;
+}
+.poistahenkilo {
+	/* Poista- nappulan fontti punaiseksi */
+	color: red;
+}
+
+
+
+

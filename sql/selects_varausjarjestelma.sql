@@ -1,0 +1,4 @@
+--VALINTALAUSE HENKIKÖTAULUSTA TIEDON HAKEMISEEN
+
+SELECT id, nimi, osoite, puhnro
+FROM henkilo;
